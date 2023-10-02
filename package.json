@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-gpt3-notes",
+	"name": "obsidian-gpt-makersuite-notes",
 	"version": "0.2.8",
-	"description": "This is a plugin that generates notes using GPT-3",
+	"description": "This is a plugin that generates notes using MakerSuite's GPT",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

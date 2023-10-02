@@ -1,4 +1,4 @@
-import { GPT3Model } from "GPT3";
+import { GPTModel } from "GPT3";
 import GPT3Notes from "main";
 import {
 	ButtonComponent,
@@ -10,8 +10,8 @@ import {
 	Setting,
 	TextAreaComponent,
 } from "obsidian";
-import { modelsKeys, models } from "SettingsView";
-import { GPT3ModelParams, GPTHistoryItem, PluginModalSettings } from "types";
+import { modelsKeys, modeltypes } from "SettingsView";
+import { GPTModelParams, GPTHistoryItem, PluginModalSettings } from "types";
 
 export class PluginModal extends Modal {
 	prompt: string;
@@ -118,22 +118,16 @@ export class PluginModal extends Modal {
 
 		const tempSetting = new Setting(container)
 			.setName("Temperature")
-			.setDesc("The amount of variation in the model (randomness).")
-			.addDropdown((dropdown) => {
-				for (let i = 0; i <= 10; i++) {
-					if (i == 5) {
-						dropdown.addOption(`${i}`, "5 (default)");
-						continue;
-					}
-					dropdown.addOption(`${i}`, `${i}`);
-				}
-
-				dropdown.setValue(`${this.plugin.settings.temperature}`);
-				dropdown.onChange((change) => {
-					this.plugin.settings.temperature = parseInt(change);
+			.setDesc( "The amount of variation in the model (randomness)." )
+			.addText((text) => {
+				text.setValue(`${this.plugin.settings.temperature}`);
+				text.inputEl.type = "number";
+				text.onChange((change) => {
+					this.plugin.settings.temperature = parseFloat(change);
 					this.plugin.saveSettings();
 				});
 			});
+
 		tempSetting.controlEl.className = "gpt_temp-setting";
 
 		const tokenSetting = new Setting(container)
@@ -149,7 +143,7 @@ export class PluginModal extends Modal {
 			});
 
 		if (
-			models[this.plugin.settings.model as keyof typeof models] === "chat"
+			modeltypes[this.plugin.settings.model as keyof typeof modeltypes] === "chat"
 		) {
 			tokenSetting.settingEl.style.display = "none";
 		}
@@ -165,8 +159,8 @@ export class PluginModal extends Modal {
 					this.plugin.settings.model = change;
 					this.plugin.saveSettings();
 					tokenSetting.settingEl.style.display =
-						models[
-							this.plugin.settings.model as keyof typeof models
+						modeltypes[
+							this.plugin.settings.model as keyof typeof modeltypes
 						] === "chat"
 							? "none"
 							: "";
@@ -280,10 +274,12 @@ export class PluginModal extends Modal {
 
 		this.processedPrompt = this.processReplacementTokens(this.prompt);
 
-		const params: GPT3ModelParams = {
+		const params: GPTModelParams = {
 			prompt: this.processedPrompt,
-			temperature: this.plugin.settings.temperature / 10,
+			temperature: this.plugin.settings.temperature,
 			tokens: this.plugin.settings.tokens,
+			topP: this.plugin.settings.topP,
+			topK: this.plugin.settings.topK,
 			model: this.plugin.settings.model,
 		};
 
@@ -297,9 +293,9 @@ export class PluginModal extends Modal {
 			return;
 		}
 
-		const response = GPT3Model.generate(
+		const response = await GPTModel.generate(
 			token,
-			apiUrl ? apiUrl : "https://api.openai.com/v1",
+			apiUrl ? apiUrl : "https://generativelanguage.googleapis.com",
 			params
 		);
 		if (response === false) {

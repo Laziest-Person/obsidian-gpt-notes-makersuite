@@ -1,7 +1,9 @@
-export type GPT3ModelParams = {
+export type GPTModelParams = {
 	prompt: string;
 	temperature: number;
 	tokens: number;
+	topP: number;
+	topK: number;
 	model: string;
 };
 export type GPTHistoryItem = {

@@ -1,79 +1,96 @@
-import { Notice } from "obsidian";
-import { GPT3ModelParams } from "types";
-import { SSE } from "../lib/sse";
-import { models } from "SettingsView";
+import { Notice, requestUrl } from "obsidian";
+import https from 'https';
+import { GPTModelParams } from "types";
+import { modeltypes, modelnames } from "SettingsView";
 
-export class GPT3Model {
+export class GPTModel {
 	constructor() {}
 
 	static endpoints = {
-		text: "/completions",
-		chat: "/chat/completions",
+		text: "/v1beta2/models/text-bison-001:generateText",
+		chat: "/v1beta2/models/chat-bison-001:generateMessage",
 	};
 
-	static generate(
+	static async generate(
 		token: string,
 		apiUrl: string,
-		params: GPT3ModelParams,
+		params: GPTModelParams,
 		retry?: number
-	): any {
+	): Promise<any> {
 		if (!retry) {
 			retry = 0;
 		}
-		const modelType = models[
-			params.model as keyof typeof models
+		const modelType = modeltypes[
+			params.model as keyof typeof modeltypes
 		] as keyof typeof this.endpoints;
 
-		const data = {
-			...this.paramsToModelParams(params, modelType),
-			stream: true,
+		const data = this.paramsToModelParams(params, modelType);
+
+		/*const response_raw = fetch( ( apiUrl + this.endpoints[modelType] + "?token=" + token ) , {
+			method: 'POST',
+			body: JSON.stringify(data),
+			headers: { 'Content-Type': 'application/json'},
+			mode: 'no-cors'
+		});*/
+
+		var path = this.endpoints[modelType];
+		const method = 'POST';
+
+		const headers = {
+			'Content-Type': 'application/json'
 		};
-		try {
-			// const response_raw = await request(request_param);
-			const stream = new SSE(apiUrl + this.endpoints[modelType], {
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-				},
-				method: "POST",
-				payload: JSON.stringify(data),
-			});
-			return stream;
-		} catch (e: any) {
-			if (retry < 5) {
-				return this.generate(token, apiUrl, params, retry + 1);
-			}
-			if (e.status === 429) {
-				new Notice("GPT-3 Rate limit error: please try again soon.");
-			} else if (e.status === 401) {
-				new Notice(
-					"Invalid token. Please change your token in the plugin settings."
-				);
-			} else {
-				new Notice("An error occured.");
-			}
-			return false;
+
+		const response = await requestUrl({
+			url: (apiUrl + path + "?key=" + token),
+			method: method,
+			body: JSON.stringify(data),
+			headers: headers
+		});
+
+		console.log(response.text);
+
+		var json_data = JSON.parse(response.text);
+
+		if (modelType === "text") { 
+			console.log("Got: " + json_data.candidates[0].output);
+			return json_data.candidates[0].output 
 		}
+		else if (modelType === "chat") { 
+			console.log("Got: " + json_data.candidates[0].content);
+			return json_data.candidates[0].content 
+		}
+		else { return false; }
+
 	}
 
-	static paramsToModelParams(params: GPT3ModelParams, modelType: string) {
+	static paramsToModelParams(params: GPTModelParams, modelType: string) {
 		if (modelType === "text") {
 			return {
-				prompt: params.prompt,
+				prompt: 
+				{
+					text: params.prompt
+				},
 				temperature: params.temperature,
-				max_tokens: params.tokens,
-				model: params.model,
+				maxOutputTokens: params.tokens,
+				topP: params.topP,
+				topK: params.topK,
+				candidateCount: 1
 			};
 		} else if (modelType === "chat") {
 			return {
-				messages: [
-					{
-						role: "user",
-						content: params.prompt,
-					},
-				],
+				prompt:
+				{
+					messages: [
+						{
+							author: "user",
+							content: params.prompt,
+						}
+					]
+				},
 				temperature: params.temperature,
-				model: params.model,
+				topP: params.topP,
+				topK: params.topK,
+				candidateCount: 1
 			};
 		}
 	}

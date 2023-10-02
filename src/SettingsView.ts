@@ -1,4 +1,4 @@
-import GPT3Notes, { DEFAULT_SETTINGS } from "main";
+import GPTNotes, { DEFAULT_SETTINGS } from "main";
 import {
 	ButtonComponent,
 	DropdownComponent,
@@ -9,23 +9,19 @@ import {
 	TextComponent,
 } from "obsidian";
 
-export const models = {
-	"text-davinci-003": "text",
-	"text-curie-001": "text",
-	"text-babbage-001": "text",
-	"text-ada-001": "text",
-	"gpt-3.5-turbo": "chat",
-	"gpt-3.5-turbo-0301": "chat",
-	"gpt-4": "chat",
-	"gpt-4-0613": "chat",
-	"gpt-4-32k": "chat",
-	"gpt-4-32k-0613	": "chat",
+export const modeltypes = {
+	"text-bison-001-chat": "chat",
+	"text-bison-001-text": "text"
+};
+export const modelnames = {
+	"text-bison-001-chat": "text-bison-001",
+	"text-bison-001-text": "text-bison-001"
 };
 
-export const modelsKeys = Object.keys(models);
+export const modelsKeys = Object.keys(modeltypes);
 
 export default class SettingsView extends PluginSettingTab {
-	constructor(private plugin: GPT3Notes) {
+	constructor(private plugin: GPTNotes) {
 		super(plugin.app, plugin);
 	}
 
@@ -37,7 +33,7 @@ export default class SettingsView extends PluginSettingTab {
 		containerEl.createEl("h1", { text: "GPT-3 Settings" });
 
 		new Setting(containerEl)
-			.setName("OpenAI API Key")
+			.setName("MakerSuite API Key")
 			.setDesc("The token generated in your OpenAI dashboard.")
 			.addText((text: TextComponent) => {
 				text.setPlaceholder("Token")
@@ -50,7 +46,7 @@ export default class SettingsView extends PluginSettingTab {
 			.addButton((button: ButtonComponent) => {
 				button.setButtonText("Generate token");
 				button.onClick((evt: MouseEvent) => {
-					window.open("https://beta.openai.com/account/api-keys");
+					window.open("https://makersuite.google.com/app/apikey");
 				});
 			});
 
@@ -60,7 +56,7 @@ export default class SettingsView extends PluginSettingTab {
 				"The URL to use for the API. Please note that it needs the same paths as the regular OpenAI API."
 			)
 			.addText((text: TextComponent) => {
-				text.setPlaceholder("https://api.openai.com/v1")
+				text.setPlaceholder("https://generativelanguage.googleapis.com")
 					.setValue(this.plugin.settings.apiUrl || "")
 					.onChange((change) => {
 						this.plugin.settings.apiUrl = change;
@@ -69,8 +65,8 @@ export default class SettingsView extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("OpenAI Model")
-			.setDesc("The type of GPT-3 model to use.")
+			.setName("GPT Model")
+			.setDesc("The type of GPT model to use.")
 			.addDropdown((dropdown: DropdownComponent) => {
 				for (let model in modelsKeys) {
 					dropdown.addOption(modelsKeys[model], modelsKeys[model]);
@@ -79,6 +75,48 @@ export default class SettingsView extends PluginSettingTab {
 					this.plugin.settings.model = change;
 				});
 				dropdown.setValue(this.plugin.settings.model);
+			});
+
+		new Setting(containerEl)
+			.setName("Temperature")
+			.setDesc(
+				"The amount of variation in the model (randomness)."
+			)
+			.addText((text: TextComponent) => {
+				text.setPlaceholder("0.8")
+					.setValue(this.plugin.settings.temperature.toString() || "0.8")
+					.onChange((change) => {
+						this.plugin.settings.temperature = parseFloat(change);
+						this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(containerEl)
+			.setName("TopP")
+			.setDesc(
+				"Setting for TopP sampling."
+			)
+			.addText((text: TextComponent) => {
+				text.setPlaceholder("0.95")
+					.setValue(this.plugin.settings.topP.toString() || "0.95")
+					.onChange((change) => {
+						this.plugin.settings.topP = parseFloat(change);
+						this.plugin.saveSettings();
+					});
+			});
+		
+		new Setting(containerEl)
+			.setName("TopK")
+			.setDesc(
+				"Setting for TopP sampling."
+			)
+			.addText((text: TextComponent) => {
+				text.setPlaceholder("40")
+					.setValue(this.plugin.settings.topK.toString() || "40")
+					.onChange((change) => {
+						this.plugin.settings.topK = parseInt(change);
+						this.plugin.saveSettings();
+					});
 			});
 
 		new Setting(containerEl)

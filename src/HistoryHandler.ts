@@ -1,8 +1,8 @@
 import { GPTHistoryItem } from "types";
-import GPT3Notes from "./main";
+import GPTNotes from "./main";
 
 export class HistoryHandler {
-	constructor(private plugin: GPT3Notes) {}
+	constructor(private plugin: GPTNotes) {}
 
 	push(history_item: GPTHistoryItem) {
 		try {

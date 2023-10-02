@@ -5,7 +5,7 @@ import { Editor, Menu, Modal, Notice, Plugin, View } from "obsidian";
 import { PluginModal } from "PluginModal";
 import { PreviewModal } from "PreviewModal";
 import SettingsView, { modelsKeys } from "SettingsView";
-import { GPT3ModelParams, GPTHistoryItem, TokenParams } from "types";
+import { GPTModelParams, GPTHistoryItem, TokenParams } from "types";
 import data from "../prompts.json";
 
 // Remember to rename these classes and interfaces!
@@ -17,6 +17,8 @@ interface GPT3_NOTES_SETTINGS {
 	model: string;
 	tokens: number;
 	temperature: number;
+	topP: number;
+	topK: number;
 	promptHistory: GPTHistoryItem[];
 	tokenParams: TokenParams;
 }
@@ -27,12 +29,14 @@ export const DEFAULT_SETTINGS: GPT3_NOTES_SETTINGS = {
 	apiUrl: null,
 	model: modelsKeys[0],
 	tokens: 300,
-	temperature: 5,
+	temperature: 0.8,
+	topP: 0.95,
+	topK: 40,
 	promptHistory: [],
 	tokenParams: data as TokenParams,
 };
 
-export default class GPT3Notes extends Plugin {
+export default class GPTNotes extends Plugin {
 	settings: GPT3_NOTES_SETTINGS;
 	event_handler: EventHandler;
 	settings_view: SettingsView;
@@ -59,15 +63,15 @@ export default class GPT3Notes extends Plugin {
 	private registerRibbonButtons() {
 		const ribbonIcon = this.addRibbonIcon(
 			"bot",
-			"GPT-3 Notes",
+			"GPT Notes",
 			(evt: MouseEvent) => {
 				new PluginModal(this).open();
 			}
 		);
 	}
 
-	showPreviewModal(modelParams: GPT3ModelParams, stream: any) {
-		new PreviewModal(this, modelParams, stream).open();
+	showPreviewModal(modelParams: GPTModelParams, previewText: string) {
+		new PreviewModal(this, modelParams, previewText).open();
 	}
 
 	// Loads the settings from memory
