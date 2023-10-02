@@ -11,11 +11,11 @@ import {
 
 export const modeltypes = {
 	"text-bison-001-chat": "chat",
-	"text-bison-001-text": "text"
+	"text-bison-001-text": "text",
 };
 export const modelnames = {
 	"text-bison-001-chat": "text-bison-001",
-	"text-bison-001-text": "text-bison-001"
+	"text-bison-001-text": "text-bison-001",
 };
 
 export const modelsKeys = Object.keys(modeltypes);
@@ -79,12 +79,12 @@ export default class SettingsView extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Temperature")
-			.setDesc(
-				"The amount of variation in the model (randomness)."
-			)
+			.setDesc("The amount of variation in the model (randomness).")
 			.addText((text: TextComponent) => {
 				text.setPlaceholder("0.8")
-					.setValue(this.plugin.settings.temperature.toString() || "0.8")
+					.setValue(
+						this.plugin.settings.temperature.toString() || "0.8"
+					)
 					.onChange((change) => {
 						this.plugin.settings.temperature = parseFloat(change);
 						this.plugin.saveSettings();
@@ -93,9 +93,7 @@ export default class SettingsView extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("TopP")
-			.setDesc(
-				"Setting for TopP sampling."
-			)
+			.setDesc("Setting for TopP sampling.")
 			.addText((text: TextComponent) => {
 				text.setPlaceholder("0.95")
 					.setValue(this.plugin.settings.topP.toString() || "0.95")
@@ -104,12 +102,10 @@ export default class SettingsView extends PluginSettingTab {
 						this.plugin.saveSettings();
 					});
 			});
-		
+
 		new Setting(containerEl)
 			.setName("TopK")
-			.setDesc(
-				"Setting for TopP sampling."
-			)
+			.setDesc("Setting for TopP sampling.")
 			.addText((text: TextComponent) => {
 				text.setPlaceholder("40")
 					.setValue(this.plugin.settings.topK.toString() || "40")

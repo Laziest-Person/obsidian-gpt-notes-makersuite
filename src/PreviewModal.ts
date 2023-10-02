@@ -42,7 +42,7 @@ export class PreviewModal extends Modal {
 			this.previewText = change;
 		});
 
-		if(this.previewText){
+		if (this.previewText) {
 			this.previewTextArea.setValue(this.previewText);
 		}
 
@@ -82,13 +82,11 @@ export class PreviewModal extends Modal {
 				view.editor.replaceSelection(newText);
 			}
 		});
-
 	}
 
 	onClose(): void {}
 
 	async handleRegenerateClick() {
-		
 		this.regenerateButton.setButtonText("Regenerating...");
 
 		const lastHistoryItemIndex =
@@ -101,7 +99,7 @@ export class PreviewModal extends Modal {
 			temperature: this.plugin.settings.temperature,
 			topP: this.plugin.settings.topP,
 			topK: this.plugin.settings.topK,
-			model: this.plugin.settings.model
+			model: this.plugin.settings.model,
 		};
 
 		const token = this.plugin.settings.token as string;

@@ -1,5 +1,5 @@
 import { Notice, requestUrl } from "obsidian";
-import https from 'https';
+import https from "https";
 import { GPTModelParams } from "types";
 import { modeltypes, modelnames } from "SettingsView";
 
@@ -34,63 +34,60 @@ export class GPTModel {
 		});*/
 
 		var path = this.endpoints[modelType];
-		const method = 'POST';
+		const method = "POST";
 
 		const headers = {
-			'Content-Type': 'application/json'
+			"Content-Type": "application/json",
 		};
 
 		const response = await requestUrl({
-			url: (apiUrl + path + "?key=" + token),
+			url: apiUrl + path + "?key=" + token,
 			method: method,
 			body: JSON.stringify(data),
-			headers: headers
+			headers: headers,
 		});
 
 		console.log(response.text);
 
 		var json_data = JSON.parse(response.text);
 
-		if (modelType === "text") { 
+		if (modelType === "text") {
 			console.log("Got: " + json_data.candidates[0].output);
-			return json_data.candidates[0].output 
-		}
-		else if (modelType === "chat") { 
+			return json_data.candidates[0].output;
+		} else if (modelType === "chat") {
 			console.log("Got: " + json_data.candidates[0].content);
-			return json_data.candidates[0].content 
+			return json_data.candidates[0].content;
+		} else {
+			return false;
 		}
-		else { return false; }
-
 	}
 
 	static paramsToModelParams(params: GPTModelParams, modelType: string) {
 		if (modelType === "text") {
 			return {
-				prompt: 
-				{
-					text: params.prompt
+				prompt: {
+					text: params.prompt,
 				},
 				temperature: params.temperature,
 				maxOutputTokens: params.tokens,
 				topP: params.topP,
 				topK: params.topK,
-				candidateCount: 1
+				candidateCount: 1,
 			};
 		} else if (modelType === "chat") {
 			return {
-				prompt:
-				{
+				prompt: {
 					messages: [
 						{
 							author: "user",
 							content: params.prompt,
-						}
-					]
+						},
+					],
 				},
 				temperature: params.temperature,
 				topP: params.topP,
 				topK: params.topK,
-				candidateCount: 1
+				candidateCount: 1,
 			};
 		}
 	}

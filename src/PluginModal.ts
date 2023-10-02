@@ -118,7 +118,7 @@ export class PluginModal extends Modal {
 
 		const tempSetting = new Setting(container)
 			.setName("Temperature")
-			.setDesc( "The amount of variation in the model (randomness)." )
+			.setDesc("The amount of variation in the model (randomness).")
 			.addText((text) => {
 				text.setValue(`${this.plugin.settings.temperature}`);
 				text.inputEl.type = "number";
@@ -143,7 +143,9 @@ export class PluginModal extends Modal {
 			});
 
 		if (
-			modeltypes[this.plugin.settings.model as keyof typeof modeltypes] === "chat"
+			modeltypes[
+				this.plugin.settings.model as keyof typeof modeltypes
+			] === "chat"
 		) {
 			tokenSetting.settingEl.style.display = "none";
 		}
@@ -160,7 +162,8 @@ export class PluginModal extends Modal {
 					this.plugin.saveSettings();
 					tokenSetting.settingEl.style.display =
 						modeltypes[
-							this.plugin.settings.model as keyof typeof modeltypes
+							this.plugin.settings
+								.model as keyof typeof modeltypes
 						] === "chat"
 							? "none"
 							: "";
