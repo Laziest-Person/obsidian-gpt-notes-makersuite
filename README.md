@@ -1,4 +1,4 @@
-# Obsidian GPT-3 Notes
+# Obsidian GPT-3 Notes forked to use Google's MakerSuite Palm API instead.
 
 To download Obsidian: [Click here](https://www.obsidian.md)
 
